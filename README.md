@@ -1,7 +1,7 @@
 
 ╔════════════════════════════════════════════════════════╗ 
-║       🎮 Recoil Control Script - Made by GoneThx      ║ 
-║        GitHub: https://github.com/GoneThx              ║ 
+     🎮 Recoil Control Script - Made by GoneThx       
+         GitHub: https://github.com/GoneThx              
 ╚════════════════════════════════════════════════════════╝
 
 📘 ABOUT THIS SCRIPT:
