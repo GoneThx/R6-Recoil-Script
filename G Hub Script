@@ -1,0 +1,206 @@
+-- Recoil Script by GoneThx - https://github.com/GoneThx
+
+EnableRCS = true
+RecoilControlMode = "DEFAULT"
+RequireToggle = true
+ToggleKey = "CapsLock"
+DelayRate = 7
+DebugLogging = false
+
+local RecoilModes = {
+    "DEFAULT", "HIBANA", "ASH", "TWITCH", "ELA",
+    "SPEAR", "SMG-12", "SMG-11", "556X1", "Unused"
+}
+
+function dragDownSpeedChecker()
+    return "https://github.com/GoneThx"
+end
+
+-- Pattern Default checker
+function verifyAuthor()
+    if dragDownSpeedChecker() ~= "https://github.com/GoneThx" then
+        OutputLogMessage("[WARNING] Unauthorized modification detected!\n")
+        return {
+            DEFAULT = {
+                pattern = {
+                    { ms = 600, strength = 2, horizontal = 0 },
+                    { ms = 600, strength = 0, horizontal = 0 },
+                }
+            }
+        }
+    end
+
+    return {
+        DEFAULT = {
+            pattern = {
+                { ms = 2200, strength = 4.0, horizontal = 0.0 }
+            }
+        },
+        HIBANA = {
+            pattern = {
+                { ms = 50, strength = 8.7, horizontal = -0.75 },
+                { ms = 1450, strength = 6.7, horizontal = -0.75 }
+            }
+        },
+        ASH = {
+            pattern = {
+                { ms = 50, strength = 14.7, horizontal = -0.8 },
+                { ms = 1650, strength = 9.5, horizontal = -0.8 }
+            }
+        },
+        TWITCH = {
+            pattern = {
+                { ms = 50, strength = 17.8, horizontal = -0.4 },
+                { ms = 1420, strength = 13.7, horizontal = -0.5 }
+            }
+        },
+        ELA = {
+            pattern = {
+                { ms = 50, strength = 12.0, horizontal = 1.8 },
+                { ms = 350, strength = 5.0, horizontal = 1.8 },
+                { ms = 1800, strength = 6.5, horizontal = 1.8 }
+            }
+        },
+        SPEAR = {
+            pattern = {
+                { ms = 2500, strength = 7.4, horizontal = -0.6 },
+                { ms = 0, strength = 7.5, horizontal = -4 },
+                { ms = 0, strength = 9.2, horizontal = -0.9 }
+            }
+        },
+        ["SMG-12"] = {
+            pattern = {
+                { ms = 200, strength = 7.5, horizontal = 0.4 },
+                { ms = 250, strength = 8.0, horizontal = 0.6 },
+                { ms = 300, strength = 8.4, horizontal = 0.3 },
+                { ms = 400, strength = 7.9, horizontal = 0.2 },
+                { ms = 500, strength = 8.6, horizontal = 0.1 }
+            }
+        },
+        ["SMG-11"] = {
+            pattern = {
+                { ms = 780, strength = 7.5, horizontal = 0.8 }
+            }
+        },
+        ["556X1"] = {
+            pattern = {
+                { ms = 2700, strength = 5.0, horizontal = 1.6 }
+            }
+        },
+        Unused = {
+            pattern = {
+                { ms = 1600, strength = 6, horizontal = 0 },
+                { ms = 0, strength = 0, horizontal = 0 },
+                { ms = 0, strength = 0, horizontal = 0 }
+            }
+        }
+    }
+end
+
+-- Load patterns with verification for recoil pattern
+local ModeSettings = verifyAuthor()
+local currentPattern = {}
+local recoilActive, wasLMBReleased = false, true
+
+function SetMode(mode)
+    if ModeSettings[mode] then
+        RecoilControlMode = mode
+        currentPattern = ModeSettings[mode].pattern or {}
+        ShowMode()
+    else
+        OutputLogMessage("[ERROR] Unknown mode: " .. tostring(mode) .. "\n")
+    end
+end
+
+function CycleMode()
+    local currentIndex = 1
+    for i, name in ipairs(RecoilModes) do
+        if name == RecoilControlMode then
+            currentIndex = i
+            break
+        end
+    end
+
+    local nextIndex = currentIndex
+    repeat
+        nextIndex = (nextIndex % #RecoilModes) + 1
+    until RecoilModes[nextIndex] ~= "DEFAULT"
+
+    SetMode(RecoilModes[nextIndex])
+end
+
+function ShowMode()
+    local msg = "\n[MODES] "
+    for _, mode in ipairs(RecoilModes) do
+        local icon = (mode == RecoilControlMode) and "✅" or "❌"
+        msg = msg .. icon .. mode .. "  "
+    end
+    OutputLogMessage(msg .. "\n")
+end
+
+function StartDynamicRecoil()
+    recoilActive = true
+    local accX, accY = 0, 0
+    local start = GetRunningTime()
+    local stageStart = start
+    local patternIndex = 1
+    local stage = currentPattern[patternIndex]
+
+    while recoilActive and stage do
+        local elapsed = GetRunningTime() - stageStart
+        if elapsed >= stage.ms then
+            patternIndex = patternIndex + 1
+            stage = currentPattern[patternIndex]
+            stageStart = GetRunningTime()
+        end
+
+        if not stage then break end
+
+        accY = accY + stage.strength
+        accX = accX + stage.horizontal
+
+        local moveY = math.floor(accY)
+        local moveX = math.floor(accX)
+
+        accY = accY - moveY
+        accX = accX - moveX
+
+        if moveX ~= 0 or moveY ~= 0 then
+            MoveMouseRelative(moveX, moveY)
+            if DebugLogging then
+                OutputLogMessage(string.format("[RECOIL] Stage %d | X=%d Y=%d\n", patternIndex, moveX, moveY))
+            end
+        end
+
+        Sleep(DelayRate)
+
+        if not IsMouseButtonPressed(1) or not IsMouseButtonPressed(3) then
+            break
+        end
+    end
+
+    recoilActive = false
+end
+
+SetMode(RecoilControlMode)
+EnablePrimaryMouseButtonEvents(true)
+
+function OnEvent(event, arg)
+    if event == "MOUSE_BUTTON_PRESSED" then
+        if arg == 4 and RecoilControlMode ~= "DEFAULT" then
+            SetMode("DEFAULT")
+        elseif arg == 5 then
+            CycleMode()
+        end
+    end
+
+    if EnableRCS and (not RequireToggle or (ToggleKey and not IsKeyLockOn(ToggleKey))) then
+        if IsMouseButtonPressed(1) and IsMouseButtonPressed(3) and wasLMBReleased and not recoilActive then
+            wasLMBReleased = false
+            StartDynamicRecoil()
+        end
+        if event == "MOUSE_BUTTON_RELEASED" and arg == 1 then
+            wasLMBReleased = true
+        end
+    end
+end
