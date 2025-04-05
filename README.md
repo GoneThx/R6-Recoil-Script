@@ -10,6 +10,13 @@ multiple operator-based weapon profiles and can be
 customized or expanded by anyone who wants to fine-tune 
 their setup.
 
+TERMS OF USE:
+If you use my code or share it on any platform (like YouTube, 
+blogs, or social media), please make sure to credit me. A 
+simple mention of my name or a link back to the original 
+source is all I ask. It helps support my work and lets 
+others know where the code came from. Thanks!
+
 💡 SCRIPT FEATURES:
 • Dynamic recoil stages that change over time
 • Operator-specific profiles (e.g., Ela, Ash, Twitch, etc.)
