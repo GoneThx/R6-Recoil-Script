@@ -1,269 +1,70 @@
+EnableRCS, profileIndex, ToggleKey, tickRate = true, 1, "CapsLock", 7
+local RequireToggle, recoilProfiles = true, {
+    {
+        name = "one",
+        stages = {
+            {strength = 6, horizontal = 8, duration = 300},
+            {strength = 7, horizontal = 8.5, duration = 300},
+            {strength = 8, horizontal = 9, duration = 600},
+        }
+    },
+    {
+        name = "two",
+        stages = {
+            {strength = 4, horizontal = 5, duration = 200},
+            {strength = 6, horizontal = 7, duration = 500},
+            {strength = 7, horizontal = 10, duration = 800},
+        }
+    },
+    
+  --[[
+  Copy below and paste for new characters
+    {
+        name = "three",
+        stages = {
+            {strength = 0, horizontal = 0, duration = 100},
+            {strength = 0, horizontal = 0, duration = 100},
+            {strength = 0, horizontal = 0, duration = 100},
+        }
+    },
+  Copy above and paste for new characters
+    ]]
+}
+
+EnablePrimaryMouseButtonEvents(true)
+local function logProfile() OutputLogMessage("Recoil Profile: %s\n", recoilProfiles[profileIndex].name) end
+logProfile()
+
+function OnEvent(event, arg)
+    if event == "MOUSE_BUTTON_PRESSED" then
+        if arg == 4 then profileIndex = (profileIndex - 2) % #recoilProfiles + 1 logProfile() end
+        if arg == 5 then profileIndex = profileIndex % #recoilProfiles + 1 logProfile() end
+    end
+
+    if EnableRCS and (not RequireToggle or not IsKeyLockOn(ToggleKey)) and IsMouseButtonPressed(3) then
+        while IsMouseButtonPressed(3) do
+            if IsMouseButtonPressed(1) then
+                local p, t0, vAcc, hAcc = recoilProfiles[profileIndex], GetRunningTime(), 0, 0
+                repeat
+                    local e, t, s = GetRunningTime() - t0, 0, p.stages[#p.stages]
+                    for i, stage in ipairs(p.stages) do
+                        t = t + stage.duration
+                        if e < t then s = stage break end
+                    end
+                    vAcc, hAcc = vAcc + s.strength, hAcc + s.horizontal
+                    local dy, dx = math.floor(vAcc), math.floor(hAcc)
+                    vAcc, hAcc = vAcc - dy, hAcc - dx
+                    if dx ~= 0 or dy ~= 0 then MoveMouseRelative(dx, dy) end
+                    Sleep(tickRate)
+                until not IsMouseButtonPressed(1) or not IsMouseButtonPressed(3)
+            end
+        end
+    end
+end
+
 -- Recoil Script by GoneThx - https://github.com/GoneThx
 
 -- This tool is written for educational purposes only, use it at your own risk/responsibility.
 
 -- ✨ You can delete this HOW TO section once you fully understand it. 
 -- If you remove it, make sure to remove the whole section to avoid issues.
-
-EnableRCS = true                   -- Turns the recoil system ON or OFF
-RecoilControlMode = "DEFAULT"     -- Sets which recoil pattern to use by default
-RequireToggle = true              -- If true, recoil only works when CapsLock is OFF
-ToggleKey = "CapsLock"            -- The key that must be OFF for recoil to activate
-DelayRate = 7                     -- Controls how fast the script runs (lower = faster)
-DebugLogging = false              -- Set to true to show extra logs for testing
-
--- List of available weapon profiles / operator setups
-local RecoilModes = {
-    "DEFAULT", "HIBANA", "ASH", "TWITCH", "GOYO", "AK-12", "ELA",
-    "SPEAR", "SMG-12", "SMG-11", "556X1", "Unused"
-}
-
----------------------------------------------------------------------
---                        HOW TO ADD A NEW GUN                     --
----------------------------------------------------------------------
---[[
-local RecoilModes = {
-    "DEFAULT", "HIBANA", "ASH", ..., "NEWGUN"  ← Add your new gun name here
-}
-You can add a name here for a new weapon. Use quotes "NEWGUN".
-The order doesn’t matter here but affects the visual order in the GUI.
-
-For pattern setup (scroll below):
-
-    ["NEWGUN"] = {
-        pattern = {
-            { ms = 300, strength = 8, horizontal = 1 },
-            { ms = 800, strength = 6, horizontal = -1 }
-        }
-    }
-
-EXPLANATION:
-- ["NEWGUN"] ← This is the name you used above.
-- pattern = { ... } ← This holds the recoil timing and direction data.
-    - ms = how long this part of the pattern lasts (in milliseconds)
-    - strength = how hard it pulls down
-    - horizontal = left/right movement (- = left, + = right)
-
-    Example:
-    { ms = 500, strength = 12, horizontal = -1 }
-    = Pulls down hard and slightly to the left for half a second
-]]--
----------------------------------------------------------------------
---                      END OF TUTORIAL                            --
----------------------------------------------------------------------
-
--- Just my name
-function dragDownSpeedChecker()
-    return "https://github.com/GoneThx"
-end
-
--- If the pattern check fails, only a default fallback pattern is loaded
-function verifyPattern()
-    if dragDownSpeedChecker() ~= "https://github.com/GoneThx" then
-        OutputLogMessage("[WARNING] UNKNOWN ERROR FALLBACK PATTERN\n")
-        return {
-            FALLBACK = {
-                pattern = {
-                    { ms = 2000, strength = 4, horizontal = 0 },
-                    { ms = 0, strength = 0, horizontal = 0 },
-                }
-            }
-        }
-    end
-    
-    return {
-        DEFAULT = {
-            pattern = {
-                { ms = 2200, strength = 4.0, horizontal = 0.0 }
-            }
-        },
-        HIBANA = {
-            pattern = {
-                { ms = 50, strength = 8.7, horizontal = -0.75 },
-                { ms = 1450, strength = 6.7, horizontal = -0.75 }
-            }
-        },
-        ASH = {
-            pattern = {
-                { ms = 10, strength = 11.7, horizontal = -0.8 },
-                { ms = 800, strength = 8.7, horizontal = -0.8 },
-                { ms = 800, strength = 9, horizontal = -0.8 }
-            }
-        },
-        TWITCH = {
-            pattern = {
-                { ms = 25, strength = 15.8, horizontal = -0.4 },
-                { ms = 1445, strength = 11.7, horizontal = -0.5 }
-            }
-        },
-        GOYO = {
-            pattern = {
-                { ms = 300, strength = 8.6, horizontal = 0 },
-                { ms = 1000, strength = 9, horizontal = 0 },
-            }
-        },
-        ["AK-12"] = {
-            pattern = {
-                { ms = 5, strength = -6.7, horizontal = -0.8 },
-                { ms = 30, strength = 11.7, horizontal = -0.8 },
-                { ms = 1000, strength = 6.5, horizontal = -0.6 },
-                { ms = 1200, strength = 6.8, horizontal = -0.8 }
-            }
-        },
-        ELA = {
-            pattern = {
-                { ms = 50, strength = 12.0, horizontal = 1.8 },
-                { ms = 350, strength = 5.0, horizontal = 1.8 },
-                { ms = 1800, strength = 6.5, horizontal = 1.8 }
-            }
-        },
-        SPEAR = {
-            pattern = {
-                { ms = 2500, strength = 7.4, horizontal = -0.6 },
-                { ms = 0, strength = 7.5, horizontal = -4 },
-                { ms = 0, strength = 9.2, horizontal = -0.9 }
-            }
-        },
-        ["SMG-12"] = {
-            pattern = {
-                { ms = 300, strength = 1, horizontal = -1 },
-                { ms = 300, strength = 12, horizontal = 12 },
-                { ms = 300, strength = 0, horizontal = 0 },
-                { ms = 300, strength = 20, horizontal = -12 },
-                { ms = 300, strength = 8, horizontal = 1 }
-            }
-        },
-        ["SMG-11"] = {
-            pattern = {
-                { ms = 780, strength = 7.5, horizontal = 0.8 }
-            }
-        },
-        ["556X1"] = {
-            pattern = {
-                { ms = 2700, strength = 5.0, horizontal = 1.6 }
-            }
-        },
-        Unused = {
-            pattern = {
-                { ms = 1600, strength = 6, horizontal = 0 },
-                { ms = 0, strength = 0, horizontal = 0 },
-                { ms = 0, strength = 0, horizontal = 0 }
-            }
-        }
-    }
-end
-
--- Load patterns
-local ModeSettings = verifyPattern()
-local currentPattern = {}
-local recoilActive, wasLMBReleased = false, true
-
--- Set the current recoil mode
-function SetMode(mode)
-    if ModeSettings[mode] then
-        RecoilControlMode = mode
-        currentPattern = ModeSettings[mode].pattern or {}
-        ShowMode()
-    else
-        OutputLogMessage("[ERROR] Unknown mode: " .. tostring(mode) .. "\n")
-    end
-end
-
--- Switch to the next recoil mode in the list
-function CycleMode()
-    local currentIndex = 1
-    for i, name in ipairs(RecoilModes) do
-        if name == RecoilControlMode then
-            currentIndex = i
-            break
-        end
-    end
-
-    local nextIndex = currentIndex
-    repeat
-        nextIndex = (nextIndex % #RecoilModes) + 1
-    until RecoilModes[nextIndex] ~= "DEFAULT"
-
-    SetMode(RecoilModes[nextIndex])
-end
-
--- Display a visual list of modes and show which one is active
-function ShowMode()
-    local msg = "\n[MODES] "
-    for _, mode in ipairs(RecoilModes) do
-        local icon = (mode == RecoilControlMode) and "✅" or "❌"
-        msg = msg .. icon .. mode .. "  "
-    end
-    OutputLogMessage(msg .. "\n")
-end
-
--- Recoil engine – runs the active pattern when firing
-function StartDynamicRecoil()
-    recoilActive = true
-    local accX, accY = 0, 0
-    local start = GetRunningTime()
-    local stageStart = start
-    local patternIndex = 1
-    local stage = currentPattern[patternIndex]
-
-    while recoilActive and stage do
-        local elapsed = GetRunningTime() - stageStart
-        if elapsed >= stage.ms then
-            patternIndex = patternIndex + 1
-            stage = currentPattern[patternIndex]
-            stageStart = GetRunningTime()
-        end
-
-        if not stage then break end
-
-        accY = accY + stage.strength
-        accX = accX + stage.horizontal
-
-        local moveY = math.floor(accY)
-        local moveX = math.floor(accX)
-
-        accY = accY - moveY
-        accX = accX - moveX
-
-        if moveX ~= 0 or moveY ~= 0 then
-            MoveMouseRelative(moveX, moveY)
-            if DebugLogging then
-                OutputLogMessage(string.format("[RECOIL] Stage %d | X=%d Y=%d\n", patternIndex, moveX, moveY))
-            end
-        end
-
-        Sleep(DelayRate)
-
-        if not IsMouseButtonPressed(1) or not IsMouseButtonPressed(3) then
-            break
-        end
-    end
-
-    recoilActive = false
-end
-
--- Start with the default mode and enable mouse button events
-SetMode(RecoilControlMode)
-EnablePrimaryMouseButtonEvents(true)
-
--- Main event listener
-function OnEvent(event, arg)
-    if event == "MOUSE_BUTTON_PRESSED" then
-        if arg == 4 and RecoilControlMode ~= "DEFAULT" then
-            SetMode("DEFAULT")            -- Press Mouse Button 4 to reset to default
-        elseif arg == 5 then
-            CycleMode()                  -- Press Mouse Button 5 to switch mode
-        end
-    end
-
-    -- Fire recoil only when CapsLock is OFF (if required), and both LMB + RMB are held
-    if EnableRCS and (not RequireToggle or (ToggleKey and not IsKeyLockOn(ToggleKey))) then
-        if IsMouseButtonPressed(1) and IsMouseButtonPressed(3) and wasLMBReleased and not recoilActive then
-            wasLMBReleased = false
-            StartDynamicRecoil()
-        end
-        if event == "MOUSE_BUTTON_RELEASED" and arg == 1 then
-            wasLMBReleased = true
-        end
-    end
-end
