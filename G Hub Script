@@ -27,7 +27,7 @@ local RequireToggle, recoilProfiles = true, { --DO NOT EDIT ABOVE TEXT IT IS THE
             {strength = 0, horizontal = 0, duration = 100},
         }
     },
-
+      
   Copy above and paste for new characters
     ]]
 }
