@@ -1,5 +1,5 @@
 EnableRCS, profileIndex, ToggleKey, tickRate = true, 1, "CapsLock", 7
-local RequireToggle, recoilProfiles = true, {
+local RequireToggle, recoilProfiles = true, { --DO NOT EDIT ABOVE TEXT IT IS THE SCRIPT LOGIC
     {
         name = "one",
         stages = {
@@ -30,7 +30,7 @@ local RequireToggle, recoilProfiles = true, {
   Copy above and paste for new characters
     ]]
 }
-
+--DO NOT EDIT BELOW TEXT IT IS THE LOGIC OF THE SCRIPT ITSELF
 EnablePrimaryMouseButtonEvents(true)
 local function logProfile() OutputLogMessage("Recoil Profile: %s\n", recoilProfiles[profileIndex].name) end
 logProfile()
