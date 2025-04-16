@@ -40,7 +40,7 @@ others know where the code came from. Thanks!
 🧩 HOW TO EDIT OR ADD RECOIL PATTERNS:
 Inside the script, each operator mode is defined like this:
 
-{
+        {
         name = "three",
         stages = {
             {strength = 0, horizontal = 0, duration = 100},
@@ -48,6 +48,7 @@ Inside the script, each operator mode is defined like this:
             {strength = 0, horizontal = 0, duration = 100},
         }
     },
+
 Paste right below the }, and dont edit anything else it will add the new preset make sure it doesnt have the same name as the last profile it will make it harder to read and understand
 
 Disclaimer
