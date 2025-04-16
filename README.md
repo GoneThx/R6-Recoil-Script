@@ -1,4 +1,4 @@
-/-------------------------------------------------------\
+/~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
         Recoil Control Script - Made by GoneThx           
           GitHub: https://github.com/GoneThx              
 \_______________________________________________________/ 
@@ -32,33 +32,23 @@ others know where the code came from. Thanks!
 4. Use the mouse buttons below to switch between profiles.
 
 🎯 KEYBINDS:
-• **Mouse Button 4** → Resets to DEFAULT recoil pattern
-• **Mouse Button 5** → Cycles through operator profiles
+• **Mouse Button 4** → Cycles forward through operator profiles
+• **Mouse Button 5** → Cycles Backwords through operator profiles
 • **CapsLock (Toggle)** → When ON, disables recoil script 
 (acts as a safety switch)
 
 🧩 HOW TO EDIT OR ADD RECOIL PATTERNS:
 Inside the script, each operator mode is defined like this:
 
-["MY-OPERATOR"] = {
-    pattern = {
-        { ms = 100, strength = 8.0, horizontal = 0.3 },
-        { ms = 300, strength = 7.5, horizontal = 0.1 }
-    }
-}
-
-aswell as in the
-
-local RecoilModes = {
-    "DEFAULT", "HIBANA", "ASH", "TWITCH", "ELA",
-    "SPEAR", "SMG-12", "SMG-11", "556X1", "Unused"
-}
-
-add your new operator with the new , "[MY-OPERATOR]"
-
-should show up automatically in the console issues 
-with numbers in he name or special characters 
-include adding ["123gun.43"] as an example 
+{
+        name = "three",
+        stages = {
+            {strength = 0, horizontal = 0, duration = 100},
+            {strength = 0, horizontal = 0, duration = 100},
+            {strength = 0, horizontal = 0, duration = 100},
+        }
+    },
+Paste right below the }, and dont edit anything else it will add the new preset make sure it doesnt have the same name as the last profile it will make it harder to read and understand
 
 Disclaimer
 This tool is only for testing and academic purposes and can only be used where strict consent has been given. Do not use it for illegal purposes! It is the end user’s responsibility to obey all applicable local, state and federal laws. Developers assume no liability and are not responsible for any misuse or damage caused by this tool and software in general.
